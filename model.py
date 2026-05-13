@@ -22,12 +22,14 @@ class PetClassifier(nn.Module):
         self.block1 = conv_block(3, 64)
         self.block2 = conv_block(64, 128)
         self.block3 = conv_block(128, 256)
+        self.block4 = conv_block(256, 512)
+
         self.pool = nn.AdaptiveAvgPool2d((2, 2))
 
         # classifier
         self.classifier = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(256 * 2 * 2, 512),
+            nn.Linear(512 * 2 * 2, 512),
             nn.ReLU(),
             # reduce overfitting
             nn.Dropout(0.3),
@@ -38,6 +40,7 @@ class PetClassifier(nn.Module):
         x = self.block1(x)
         x = self.block2(x)
         x = self.block3(x)
+        x = self.block4(x)
         x = self.pool(x)
         x = self.classifier(x)
 
