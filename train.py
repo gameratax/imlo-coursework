@@ -14,8 +14,19 @@ LR = 1e-3
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
-# image preprocessing
-transform = transforms.Compose([
+# training transforms
+train_transform = transforms.Compose([
+    transforms.Resize((160, 160)),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        [0.485, 0.456, 0.406],
+        [0.229, 0.224, 0.225]
+    )
+])
+
+# validation transforms
+val_transform = transforms.Compose([
     transforms.Resize((160, 160)),
     transforms.ToTensor(),
     transforms.Normalize(
@@ -27,7 +38,6 @@ transform = transforms.Compose([
 dataset = OxfordIIITPet(
     root="./data",
     split="trainval",
-    transform=transform,
     download=True
 )
 
@@ -39,6 +49,10 @@ train_data, val_data = random_split(
     dataset,
     [train_size, val_size]
 )
+
+# apply transforms separately
+train_data.dataset.transform = train_transform
+val_data.dataset.transform = val_transform
 
 train_loader = DataLoader(
     train_data,
@@ -90,7 +104,6 @@ for epoch in range(EPOCHS):
 
     train_acc = 100 * correct / total
 
-    # validation step
     model.eval()
 
     val_correct = 0
@@ -100,8 +113,11 @@ for epoch in range(EPOCHS):
         for imgs, labels in val_loader:
             imgs = imgs.to(device)
             labels = labels.to(device)
+
             outputs = model(imgs)
+
             preds = outputs.argmax(1)
+
             val_correct += (preds == labels).sum().item()
             val_total += labels.size(0)
 
