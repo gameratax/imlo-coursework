@@ -41,7 +41,7 @@ dataset = OxfordIIITPet(
     download=True
 )
 
-# create validation split
+# validation split
 train_size = int(0.9 * len(dataset))
 val_size = len(dataset) - train_size
 
@@ -50,7 +50,6 @@ train_data, val_data = random_split(
     [train_size, val_size]
 )
 
-# apply transforms separately
 train_data.dataset.transform = train_transform
 val_data.dataset.transform = val_transform
 
@@ -72,6 +71,12 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(
     model.parameters(),
     lr=LR
+)
+
+# gradually reduce learning rate
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    optimizer,
+    T_max=EPOCHS
 )
 
 best_val = 0
@@ -101,6 +106,9 @@ for epoch in range(EPOCHS):
 
         correct += (preds == labels).sum().item()
         total += labels.size(0)
+
+    # update scheduler each epoch
+    scheduler.step()
 
     train_acc = 100 * correct / total
 
