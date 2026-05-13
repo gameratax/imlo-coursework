@@ -68,9 +68,11 @@ model = PetClassifier().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
+# Adam optimizer with weight decay
 optimizer = torch.optim.Adam(
     model.parameters(),
-    lr=LR
+    lr=LR,
+    weight_decay=1e-4
 )
 
 # gradually reduce learning rate
@@ -107,7 +109,6 @@ for epoch in range(EPOCHS):
         correct += (preds == labels).sum().item()
         total += labels.size(0)
 
-    # update scheduler each epoch
     scheduler.step()
 
     train_acc = 100 * correct / total
