@@ -29,6 +29,8 @@ class PetClassifier(nn.Module):
             nn.Flatten(),
             nn.Linear(256 * 2 * 2, 512),
             nn.ReLU(),
+            # reduce overfitting
+            nn.Dropout(0.3),
             nn.Linear(512, 37)
         )
 
