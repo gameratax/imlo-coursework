@@ -17,7 +17,14 @@ print("Using device:", device)
 # training transforms
 train_transform = transforms.Compose([
     transforms.Resize((160, 160)),
+    # data augmentation
     transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(10),
+    transforms.ColorJitter(
+        brightness=0.1,
+        contrast=0.1,
+        saturation=0.1
+    ),
     transforms.ToTensor(),
     transforms.Normalize(
         [0.485, 0.456, 0.406],
@@ -29,6 +36,7 @@ train_transform = transforms.Compose([
 val_transform = transforms.Compose([
     transforms.Resize((160, 160)),
     transforms.ToTensor(),
+
     transforms.Normalize(
         [0.485, 0.456, 0.406],
         [0.229, 0.224, 0.225]
@@ -68,7 +76,6 @@ model = PetClassifier().to(device)
 
 criterion = nn.CrossEntropyLoss()
 
-# Adam optimizer with weight decay
 optimizer = torch.optim.Adam(
     model.parameters(),
     lr=LR,
