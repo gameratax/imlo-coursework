@@ -9,7 +9,7 @@ from model import PetClassifier
 
 BATCH_SIZE = 64
 EPOCHS = 30
-LR = 1e-3
+LR = 3e-4
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
