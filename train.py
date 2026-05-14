@@ -102,7 +102,8 @@ optimizer = torch.optim.Adam(
 # gradually reduce learning rate
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     optimizer,
-    T_max=EPOCHS
+    T_max=EPOCHS,
+    eta_min=1e-6
 )
 
 best_val = 0
