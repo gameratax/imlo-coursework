@@ -29,11 +29,11 @@ class PetClassifier(nn.Module):
         # classifier
         self.classifier = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(512 * 2 * 2, 512),
+            nn.Linear(512 * 2 * 2, 768),
             nn.ReLU(),
             # reduce overfitting
             nn.Dropout(0.3),
-            nn.Linear(512, 37)
+            nn.Linear(768, 37)
         )
 
     def forward(self, x):
