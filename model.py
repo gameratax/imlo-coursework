@@ -32,7 +32,7 @@ class PetClassifier(nn.Module):
             nn.Linear(512 * 2 * 2, 768),
             nn.ReLU(),
             # reduce overfitting
-            nn.Dropout(0.3),
+            nn.Dropout(0.4),
             nn.Linear(768, 37)
         )
 
