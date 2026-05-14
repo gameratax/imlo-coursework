@@ -1,6 +1,7 @@
+import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, Subset
 from torchvision import transforms
 from torchvision.datasets import OxfordIIITPet
 from tqdm import tqdm
@@ -43,23 +44,39 @@ val_transform = transforms.Compose([
     )
 ])
 
-dataset = OxfordIIITPet(
+base_dataset = OxfordIIITPet(
     root="./data",
     split="trainval",
     download=True
 )
 
-# validation split
-train_size = int(0.9 * len(dataset))
-val_size = len(dataset) - train_size
+# deterministic validation split
+indices = np.arange(len(base_dataset))
 
-train_data, val_data = random_split(
-    dataset,
-    [train_size, val_size]
+np.random.seed(42)
+np.random.shuffle(indices)
+
+split = int(0.9 * len(indices))
+
+train_idx = indices[:split]
+val_idx = indices[split:]
+
+train_dataset = OxfordIIITPet(
+    root="./data",
+    split="trainval",
+    transform=train_transform,
+    download=False
 )
 
-train_data.dataset.transform = train_transform
-val_data.dataset.transform = val_transform
+val_dataset = OxfordIIITPet(
+    root="./data",
+    split="trainval",
+    transform=val_transform,
+    download=False
+)
+
+train_data = Subset(train_dataset, train_idx)
+val_data = Subset(val_dataset, val_idx)
 
 train_loader = DataLoader(
     train_data,
