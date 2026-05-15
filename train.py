@@ -21,8 +21,8 @@ print("Using device:", device)
 def crop_with_trimap(image, trimap, padding=0.10):
     mask = np.array(trimap)
 
-    # foreground + boundary
-    pet_mask = mask != 2
+    # only definite pet pixels
+    pet_mask = mask == 1
 
     ys, xs = np.where(pet_mask)
 
