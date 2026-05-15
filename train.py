@@ -1,7 +1,9 @@
+import os
 import numpy as np
+from PIL import Image
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset, Dataset
 from torchvision import transforms
 from torchvision.datasets import OxfordIIITPet
 from tqdm import tqdm
@@ -15,10 +17,37 @@ LR = 1.9e-4
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
+# helper function for trimap cropping
+def crop_with_trimap(image, trimap, padding=0.10):
+    mask = np.array(trimap)
+
+    # foreground + boundary
+    pet_mask = mask != 2
+
+    ys, xs = np.where(pet_mask)
+
+    if len(xs) == 0 or len(ys) == 0:
+        return image
+
+    x1, x2 = xs.min(), xs.max()
+    y1, y2 = ys.min(), ys.max()
+
+    w = x2 - x1
+    h = y2 - y1
+
+    pad_x = int(w * padding)
+    pad_y = int(h * padding)
+
+    x1 = max(0, x1 - pad_x)
+    y1 = max(0, y1 - pad_y)
+    x2 = min(image.width, x2 + pad_x)
+    y2 = min(image.height, y2 + pad_y)
+
+    return image.crop((x1, y1, x2, y2))
+
 # training transforms
 train_transform = transforms.Compose([
     transforms.Resize((160, 160)),
-    # data augmentation
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(10),
     transforms.ColorJitter(
@@ -99,7 +128,6 @@ optimizer = torch.optim.Adam(
     weight_decay=1e-4
 )
 
-# gradually reduce learning rate
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     optimizer,
     T_max=EPOCHS,
