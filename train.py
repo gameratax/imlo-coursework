@@ -45,6 +45,46 @@ def crop_with_trimap(image, trimap, padding=0.10):
 
     return image.crop((x1, y1, x2, y2))
 
+
+class PetTrimapDataset(Dataset):
+    def __init__(self, split, transform=None, download=True):
+        self.data = OxfordIIITPet(
+            root="./data",
+            split=split,
+            target_types="category",
+            download=download
+        )
+
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        image, label = self.data[idx]
+
+        img_path = self.data._images[idx]
+        filename = os.path.basename(img_path)
+
+        trimap_path = os.path.join(
+            "./data",
+            "oxford-iiit-pet",
+            "annotations",
+            "trimaps",
+            filename.replace(".jpg", ".png")
+        )
+
+        # crop image around pet region
+        if os.path.exists(trimap_path):
+            trimap = Image.open(trimap_path)
+            image = crop_with_trimap(image, trimap)
+
+        if self.transform:
+            image = self.transform(image)
+
+        return image, label
+
+
 # training transforms
 train_transform = transforms.Compose([
     transforms.Resize((160, 160)),
@@ -73,9 +113,9 @@ val_transform = transforms.Compose([
     )
 ])
 
-base_dataset = OxfordIIITPet(
-    root="./data",
+base_dataset = PetTrimapDataset(
     split="trainval",
+    transform=None,
     download=True
 )
 
@@ -90,15 +130,13 @@ split = int(0.9 * len(indices))
 train_idx = indices[:split]
 val_idx = indices[split:]
 
-train_dataset = OxfordIIITPet(
-    root="./data",
+train_dataset = PetTrimapDataset(
     split="trainval",
     transform=train_transform,
     download=False
 )
 
-val_dataset = OxfordIIITPet(
-    root="./data",
+val_dataset = PetTrimapDataset(
     split="trainval",
     transform=val_transform,
     download=False
