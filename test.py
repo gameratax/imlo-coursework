@@ -38,7 +38,7 @@ train_loader = DataLoader(
 
 test_loader = DataLoader(
     test_data,
-    batch_size=64
+    batch_size=128
 )
 
 model = PetClassifier().to(device)
