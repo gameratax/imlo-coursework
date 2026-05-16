@@ -7,7 +7,6 @@ from torch.utils.data import DataLoader, Subset, Dataset
 from torchvision import transforms
 from torchvision.datasets import OxfordIIITPet
 from tqdm import tqdm
-
 from model import PetClassifier
 
 BATCH_SIZE = 64
@@ -106,12 +105,6 @@ class PetTrimapDataset(Dataset):
 train_transform = transforms.Compose([
     transforms.Resize((160, 160)),
     transforms.RandomHorizontalFlip(),
-    transforms.RandomRotation(10),
-    transforms.ColorJitter(
-        brightness=0.1,
-        contrast=0.1,
-        saturation=0.1
-    ),
     transforms.ToTensor(),
     transforms.Normalize(
         [0.485, 0.456, 0.406],
