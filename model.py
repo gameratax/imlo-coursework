@@ -18,8 +18,9 @@ class PetClassifier(nn.Module):
     def __init__(self):
         super().__init__()
 
-        # convolution blocks
-        self.block1 = conv_block(3, 64)
+        # 4 channels:
+        # RGB = 3, trimap mask = 1
+        self.block1 = conv_block(4, 64)
         self.block2 = conv_block(64, 128)
         self.block3 = conv_block(128, 256)
         self.block4 = conv_block(256, 512)
