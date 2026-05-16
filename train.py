@@ -18,7 +18,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
 # helper function for trimap cropping
-def crop_with_trimap(image, trimap, padding=0.10):
+def crop_with_trimap(image, trimap, padding=0.20):
     mask = np.array(trimap)
 
     # only definite pet pixels
@@ -82,6 +82,23 @@ class PetTrimapDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
+        # create extra trimap mask channel
+        if os.path.exists(trimap_path):
+            trimap = Image.open(trimap_path).resize((160, 160))
+
+            mask = np.array(trimap)
+
+            # only definite pet pixels
+            mask = (mask == 1).astype(np.float32)
+
+            mask = torch.tensor(mask).unsqueeze(0)
+
+        else:
+            mask = torch.zeros((1, 160, 160), dtype=torch.float32)
+
+        # RGB + mask channel
+        image = torch.cat([image, mask], dim=0)
+
         return image, label
 
 
@@ -106,7 +123,6 @@ train_transform = transforms.Compose([
 val_transform = transforms.Compose([
     transforms.Resize((160, 160)),
     transforms.ToTensor(),
-
     transforms.Normalize(
         [0.485, 0.456, 0.406],
         [0.229, 0.224, 0.225]
