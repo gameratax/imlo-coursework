@@ -5,7 +5,6 @@ from torchvision import transforms
 from torchvision.datasets import OxfordIIITPet
 import numpy as np
 from PIL import Image
-
 from model import PetClassifier
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
